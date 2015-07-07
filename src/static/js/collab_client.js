@@ -22,6 +22,7 @@
 
 var chat = require('./chat').chat;
 var hooks = require('./pluginfw/hooks');
+var Changeset = require("./Changeset");
 
 // Dependency fill on init. This exists for `pad.socket` only.
 // TODO: bind directly to the socket.
@@ -180,10 +181,42 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options, _pad)
       }
     }
 
+    // is used for prepare changeset and send to server
+    // decrypt changeset string: https://github.com/ether/etherpad-lite/wiki/Changeset-Library
     var sentMessage = false;
     var userChangesData = editor.prepareUserChangeset();
     if (userChangesData.changeset)
     {
+      var cs = userChangesData.changeset;
+      var unpacked = Changeset.unpack(cs);
+      var opiterator = Changeset.opIterator(unpacked.ops);
+      unpacked.ops = new Array();
+      while (opiterator.hasNext())
+      {
+        unpacked.ops.push(opiterator.next());
+      }
+      //console.log(cs);
+      //console.log(unpacked);
+      //console.log(opiterator);
+
+      var content = "";
+      var contentList = document.getElementById("editorcontainer").children[0]
+                    .contentDocument.getElementById("outerdocbody").children[0]
+                    .contentDocument.getElementById("innerdocbody").children;
+      for (var i = 0; i<contentList.length; i++) {
+        content+= contentList[i].textContent + '\n';
+      }
+      
+      var actType = 'keyPress';
+      var action  = 'etherpad';
+      var target1 = content;
+      var target2 = JSON.stringify(unpacked);
+
+      //console.log(actType +' '+ action +' '+ target1 +' '+ target2);
+      if (logActionExist && log) {
+        log.logAction(actType, action, target1, target2);
+      }
+
       lastCommitTime = t;
       state = "COMMITTING";
       stateMessage = {

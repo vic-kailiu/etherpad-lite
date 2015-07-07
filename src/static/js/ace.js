@@ -259,13 +259,16 @@ plugins.ensure(function () {\n\
 });\n\
 '));
 
+      iframeHTML.push('<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>');
+      iframeHTML.push('<script src="http://knowledgear.com/log/newsroom/log.etherpad.inner.min.js"></script>');
+
       iframeHTML.push('<style type="text/css" title="dynamicsyntax"></style>');
 
       hooks.callAll("aceInitInnerdocbodyHead", {
         iframeHTML: iframeHTML
       });
 
-      iframeHTML.push('</head><body id="innerdocbody" role="application" class="syntax" spellcheck="false">&nbsp;</body></html>');
+      iframeHTML.push('</head><body id="innerdocbody" role="application" class="syntax track_copy track_paste track_cut" track-data1="etherpad_input" spellcheck="false">&nbsp;</body></html>');
 
       // Expose myself to global for my child frame.
       var thisFunctionsName = "ChildAccessibleAce2Editor";
